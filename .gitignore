@@ -1,0 +1,16 @@
+# Python virtual env
+backend/.venv/
+
+# Python cache
+**/__pycache__/
+**/*.pyc
+
+# Local env files
+backend/.env
+
+# Runtime temp files
+backend/tmp/
+
+# OS / editor
+.DS_Store
+.vscode/

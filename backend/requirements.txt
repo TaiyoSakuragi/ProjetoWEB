@@ -1,0 +1,10 @@
+flask>=3.0.0
+flask-jwt-extended>=4.6.0
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.9
+geoalchemy2>=0.14.0
+python-dotenv>=1.0.0
+werkzeug>=3.0.0
+bcrypt>=4.1.0
+firebase-admin>=6.0.0
+pandas>=2.0.0

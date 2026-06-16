@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProjetoWEB | Dashboard</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="./css/dashboard.css" />
+</head>
+
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <span>&lt;&lt;</span>
+    </div>
+    <nav class="menu-items">
+      <button id="view-data-btn" type="button" class="nav-item active" aria-pressed="true">
+        📈 Série Histórica
+      </button>
+      <button id="view-map-btn" type="button" class="nav-item" aria-pressed="false">
+        📍 Mapa Interativo
+      </button>
+      <button id="view-register-btn" type="button" class="nav-item" aria-pressed="false">
+        ⚙️ Gestão de Cadastros
+      </button>
+      <button type="button" class="nav-item" aria-pressed="false">📄 Relatórios</button>
+      <button type="button" class="nav-item" aria-pressed="false">👥 Usuários</button>
+    </nav>
+    <div class="user-profile">
+      <div class="user-info">
+        <div class="avatar"></div>
+        <span id="user-menu-btn" style="font-weight: 500; font-size: 0.95rem; color: white;">Usuário</span>
+      </div>
+      <button id="logout-btn" type="button" class="btn-logout">Sair</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <header>
+      <div id="breadcrumb-text" class="breadcrumb">Início &gt; Série Histórica</div>
+      <h1 id="page-title" class="page-title">Análise de Série Histórica por Estação</h1>
+      <span id="view-context-text" class="hidden"></span>
+    </header>
+
+    <section class="card" id="data-controls">
+      <h2 class="card-title" style="margin-bottom: 12px; font-size: 1.1rem;">Área de trabalho</h2>
+      <div class="filters-container">
+        <div class="input-group">
+          <label>Data Início</label>
+          <input type="date" id="start-date" class="input-control" />
+        </div>
+        <div class="input-group">
+          <label>Data Fim</label>
+          <input type="date" id="end-date" class="input-control" />
+        </div>
+        <div class="input-group">
+          <label>Variável</label>
+          <select id="variable-select" class="input-control">
+            <option value="" selected disabled>Selecione uma variável</option>
+            <option value="air_temperature">Temperatura</option>
+            <option value="air_humidity">Umidade</option>
+            <option value="air_pressure">Pressão</option>
+            <option value="wind_speed">Velocidade do vento</option>
+            <option value="wind_direction">Direção do vento</option>
+            <option value="rain_accumulated">Precipitação acumulada</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Estação</label>
+          <select id="station-select" class="input-control"></select>
+        </div>
+        <div class="buttons-group">
+          <button id="search-btn" type="button" class="btn btn-search" disabled>🔍 Buscar</button>
+          <button id="refresh-btn" type="button" class="btn btn-refresh">🔄 Atualizar</button>
+        </div>
+      </div>
+      <p id="dashboard-error" class="error"></p>
+    </section>
+
+    <div class="middle-grid" id="data-panel">
+
+      <section class="card chart-card">
+        <h2 id="chart-title" class="card-title">Série histórica</h2>
+        <p id="chart-subtitle" class="card-subtitle">Selecione os filtros e clique em Buscar.</p>
+        <div class="chart-placeholder">
+          <div id="chart-empty-state" class="chart-empty-state">Selecione uma estação, um período e uma variável para
+            visualizar o gráfico.</div>
+          <canvas id="observations-chart"></canvas>
+        </div>
+      </section>
+
+      <div class="right-column">
+        <section class="card map-card">
+          <div id="station-preview-map" class="map-placeholder"></div>
+          <p id="station-preview-empty" class="map-placeholder-text">Selecione uma estação com localização.</p>
+        </section>
+
+        <section class="card table-card">
+          <h2 class="card-title">Leituras recentes</h2>
+          <div id="station-meta" class="station-info-box hidden" aria-live="polite">
+            <strong>Localização:</strong> <span id="station-location-text">Selecione uma estação para ver a
+              localização.</span>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Variável</th>
+                  <th>Valor</th>
+                  <th>Hora</th>
+                </tr>
+              </thead>
+              <tbody id="latest-table-body">
+                <tr>
+                  <td colspan="3">Selecione uma estação e clique em Buscar.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div id="summary-grid" class="stats-grid"></div>
+
+    <section class="card hidden" id="stations-map-panel">
+      <div id="map-controls"></div>
+      <div class="map-layout" id="map-layout">
+        <div id="stations-map" class="stations-map" role="img" aria-label="Mapa com pinpoints das estações"></div>
+        <aside class="map-insight hidden" id="map-insight-panel" aria-live="polite">
+          <p class="map-insight-title" id="map-insight-name">Detalhes da estação</p>
+          <p class="map-insight-line" id="map-insight-coords">Lat/Lon: -</p>
+          <p class="map-insight-line" id="map-insight-latest">Último dado: clique em um pin</p>
+          <div class="map-stations-section">
+            <p class="map-insight-title">Estações do usuário</p>
+            <div id="map-stations-list" class="map-stations-list"></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="card hidden" id="register-panel">
+      <div id="register-controls"></div>
+      <h3>Central de Cadastros</h3>
+      <p class="subtitle">Gerencie estações, localizações e usuários da operação em um único fluxo.</p>
+
+      <div class="register-grid">
+        <form id="register-device-form" class="register-form">
+          <p class="register-title">Nova estação</p>
+          <p class="register-description">Cadastre um novo dispositivo para disponibilizá-lo nos painéis.</p>
+          <label class="field">
+            <span>Nome da estação</span>
+            <input id="register-device-name" type="text" placeholder="Ex.: Sensor DHT com LoRa" minlength="3" required />
+          </label>
+          <button type="submit" data-default-label="Criar estação" data-loading-label="Criando...">Criar estação</button>
+          <p id="register-device-msg" class="form-message"></p>
+        </form>
+
+        <form id="register-location-form" class="register-form">
+          <p class="register-title">Nova localização</p>
+          <p class="register-description">Associe coordenadas para que a estação apareça no mapa interativo.</p>
+          <label class="field">
+            <span>Estação</span>
+            <select id="register-location-device" required></select>
+          </label>
+          <label class="field">
+            <span>Latitude</span>
+            <input id="register-location-lat" type="number" step="any" placeholder="-23.5505" required />
+          </label>
+          <label class="field">
+            <span>Longitude</span>
+            <input id="register-location-lon" type="number" step="any" placeholder="-46.6333" required />
+          </label>
+          <button type="submit" data-default-label="Salvar localização" data-loading-label="Salvando...">Salvar localização</button>
+          <p id="register-location-msg" class="form-message"></p>
+        </form>
+
+        <form id="register-user-form" class="register-form">
+          <p class="register-title">Novo usuário</p>
+          <p class="register-description">Crie acessos para operadores e administradores do cliente.</p>
+          <label class="field">
+            <span>Nome</span>
+            <input id="register-user-name" type="text" placeholder="Ex.: Operador LoRa" minlength="3" required />
+          </label>
+          <label class="field">
+            <span>E-mail</span>
+            <input id="register-user-email" type="email" placeholder="operador@empresa.com" required />
+          </label>
+          <label class="field">
+            <span>Senha</span>
+            <input id="register-user-password" type="password" placeholder="********" minlength="8" required />
+          </label>
+          <button type="submit" data-default-label="Criar usuário" data-loading-label="Criando...">Criar usuário</button>
+          <p id="register-user-msg" class="form-message"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script type="module" src="./js/script.js"></script>
+</body>
+
+</html>
