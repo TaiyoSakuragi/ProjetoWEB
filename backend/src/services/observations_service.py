@@ -2,6 +2,7 @@ import pandas as pd
 from flask import abort
 import numpy as np
 import json
+from werkzeug.exceptions import HTTPException
 
 import src.db_config as _cfg
 
@@ -68,6 +69,8 @@ class ObservationsService(IService):
 
             self._repo.insert(**payload)
             return {"message": "Observação inserida com sucesso"}
+        except HTTPException:
+            raise
         except Exception as e:
             abort(500, description=str(e))
 

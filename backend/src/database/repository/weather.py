@@ -16,6 +16,18 @@ class WeatherRepository:
             )
             return conn.execute(stmt).first() is not None
 
+    def insert(self, **data):
+        required = {"device_id", "register"}
+        missing = required.difference(data.keys())
+        if missing:
+            raise ValueError(f"Missing required fields: {', '.join(sorted(missing))}")
+
+        db_columns = set(_models.observation_table.columns.keys())
+        payload = {k: v for k, v in data.items() if k in db_columns}
+
+        with self.engine.begin() as conn:
+            conn.execute(_models.observation_table.insert().values(**payload))
+
     
     def save_observations(self, df: pd.DataFrame):
         try:
