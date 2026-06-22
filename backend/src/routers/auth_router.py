@@ -13,3 +13,8 @@ def login():
 @auth_bp.post("/refresh")
 def refresh():
     return _ctrl.refresh()
+
+
+@auth_bp.post("/logout")
+def logout():
+    return _ctrl.logout()

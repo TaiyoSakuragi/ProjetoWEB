@@ -21,6 +21,21 @@ class DeviceRepository(IDAO):
         row = self.get_device_metadata(device_id, client_id=client_id)
         return dict(row._mapping) if row else None
 
+    def find_by_external_id(self, external_id: str | int, client_id: int | None = None) -> dict | None:
+        with Session(self.engine) as session:
+            normalized_external_id = external_id
+            if external_id not in (None, ""):
+                raw = str(external_id).strip()
+                compact = raw.replace(".", "").replace(",", "")
+                if compact.isdigit():
+                    normalized_external_id = int(compact)
+
+            stmt = select(_models.device_table).where(_models.device_table.c.external_id == normalized_external_id)
+            if client_id is not None:
+                stmt = stmt.where(_models.device_table.c.client_id == client_id)
+            row = session.execute(stmt).first()
+            return dict(row._mapping) if row else None
+
     def get_active_by(self, provider_name: str, client_id: int):
         """Busca IDs externos das estações ativas de um provedor específico."""
         with Session(self.engine) as session:

@@ -2,7 +2,7 @@ import src.db_config as _cfg
 from flask import abort
 from src.interfaces.iservice import IService
 from src.database.repository.client_repository import ClientRepository
-from src.services.access_control import is_admin
+from src.services.access_control import is_admin, get_current_principal
 
 
 class ClientsService(IService):
@@ -16,7 +16,9 @@ class ClientsService(IService):
 
     def get_by_id(self, id: int):
         if not is_admin():
-            abort(403, description="Acesso negado: permissão insuficiente")
+            user, _ = get_current_principal()
+            if user.get("client_id") != id:
+                abort(403, description="Acesso negado: cliente diferente")
         return self._repo.find_by_id(id)
 
     def create(self, data: dict):

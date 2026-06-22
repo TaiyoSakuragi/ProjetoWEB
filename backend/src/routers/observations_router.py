@@ -24,3 +24,9 @@ def show(id):
 @require_fields("device_id", "register")
 def store():
     return _ctrl.store()
+
+
+@observations_bp.post("/ingest")
+@jwt_required()
+def ingest():
+    return _ctrl.ingest()

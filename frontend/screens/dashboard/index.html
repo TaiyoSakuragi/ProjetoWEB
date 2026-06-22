@@ -11,10 +11,10 @@
 
 <body>
 
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <span>&lt;&lt;</span>
-    </div>
+  <aside id="sidebar" class="sidebar">
+    <button id="sidebar-toggle-btn" type="button" class="sidebar-header" aria-label="Recolher menu">
+      <span id="sidebar-toggle-icon">&lt;&lt;</span>
+    </button>
     <nav class="menu-items">
       <button id="view-data-btn" type="button" class="nav-item active" aria-pressed="true">
         📈 Série Histórica
@@ -25,8 +25,10 @@
       <button id="view-register-btn" type="button" class="nav-item" aria-pressed="false">
         ⚙️ Gestão de Cadastros
       </button>
-      <button type="button" class="nav-item" aria-pressed="false">📄 Relatórios</button>
-      <button type="button" class="nav-item" aria-pressed="false">👥 Usuários</button>
+      <button id="view-datahub-btn" type="button" class="nav-item" aria-pressed="false">🗂️ Dados</button>
+      <button id="view-reports-btn" type="button" class="nav-item" aria-pressed="false">📄 Relatórios</button>
+      <button id="view-users-btn" type="button" class="nav-item" aria-pressed="false">👥 Usuários</button>
+      <button id="view-admin-logs-btn" type="button" class="nav-item hidden" aria-pressed="false">🛡️ Logs Admin</button>
     </nav>
     <div class="user-profile">
       <div class="user-info">
@@ -75,6 +77,12 @@
         <div class="buttons-group">
           <button id="search-btn" type="button" class="btn btn-search" disabled>🔍 Buscar</button>
           <button id="refresh-btn" type="button" class="btn btn-refresh">🔄 Atualizar</button>
+          <button id="download-pdf-btn" type="button" class="btn btn-pdf">
+            <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 3a1 1 0 0 1 1 1v8.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 3.98a1 1 0 0 1-1.4 0l-4-3.98a1 1 0 1 1 1.4-1.42l2.3 2.3V4a1 1 0 0 1 1-1Zm-7 14a1 1 0 0 1 1 1v1h12v-1a1 1 0 1 1 2 0v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1Z" />
+            </svg>
+            Download PDF
+          </button>
         </div>
       </div>
       <p id="dashboard-error" class="error"></p>
@@ -130,7 +138,7 @@
       <div id="map-controls"></div>
       <div class="map-layout" id="map-layout">
         <div id="stations-map" class="stations-map" role="img" aria-label="Mapa com pinpoints das estações"></div>
-        <aside class="map-insight hidden" id="map-insight-panel" aria-live="polite">
+        <aside class="map-insight" id="map-insight-panel" aria-live="polite">
           <p class="map-insight-title" id="map-insight-name">Detalhes da estação</p>
           <p class="map-insight-line" id="map-insight-coords">Lat/Lon: -</p>
           <p class="map-insight-line" id="map-insight-latest">Último dado: clique em um pin</p>
@@ -198,9 +206,188 @@
         </form>
       </div>
     </section>
+
+    <section class="card hidden" id="datahub-panel">
+      <h3>Central de Dados</h3>
+      <p class="subtitle">Envie arquivos para ingestao e baixe dados das tabelas do seu cliente.</p>
+
+      <div class="datahub-grid">
+        <section class="card datahub-card">
+          <h4 class="card-title">Ingestao de Arquivos</h4>
+          <div class="datahub-fields">
+            <label class="field">
+              <span>Destino</span>
+              <select id="datahub-ingest-target" class="input-control">
+                <option value="devices">Devices</option>
+                <option value="observations">Observations</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Arquivo</span>
+              <input id="datahub-ingest-file" type="file" accept=".json,.csv,.xml" class="input-control" />
+            </label>
+            <button id="datahub-ingest-btn" type="button" class="btn btn-search">📤 Enviar arquivo</button>
+            <p class="datahub-hint">Devices aceita JSON, CSV e XML. Observations aceita JSON e CSV.</p>
+            <p id="datahub-ingest-msg" class="form-message"></p>
+
+            <div id="datahub-preview-box" class="datahub-preview hidden">
+              <p id="datahub-preview-summary" class="datahub-preview-summary"></p>
+              <div class="table-wrapper datahub-preview-table-wrapper">
+                <table class="data-table">
+                  <thead id="datahub-preview-head"></thead>
+                  <tbody id="datahub-preview-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card datahub-card">
+          <h4 class="card-title">Exportacao de Tabelas</h4>
+          <div class="datahub-fields">
+            <label class="field">
+              <span>Tabela</span>
+              <select id="datahub-export-table" class="input-control">
+                <option value="devices">Devices</option>
+                <option value="observations">Observations</option>
+                <option value="users">Users</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Formato</span>
+              <select id="datahub-export-format" class="input-control">
+                <option value="json">JSON</option>
+                <option value="csv">CSV</option>
+                <option value="xml">XML</option>
+              </select>
+            </label>
+            <button id="datahub-export-btn" type="button" class="btn btn-pdf">⬇️ Baixar dados</button>
+            <p id="datahub-export-msg" class="form-message"></p>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="card hidden" id="reports-panel">
+      <div class="report-header">
+        <div>
+          <h3>Relatório Geral das Estações</h3>
+          <p class="subtitle">Resumo completo com todas as estações que este usuário consegue acessar.</p>
+        </div>
+        <div class="report-actions">
+          <button id="reports-refresh-btn" type="button" class="btn btn-refresh">🔄 Atualizar relatório</button>
+          <button id="reports-download-btn" type="button" class="btn btn-pdf">📄 Baixar PDF</button>
+        </div>
+      </div>
+
+      <div class="filters-container report-filters">
+        <div class="input-group">
+          <label>Estação</label>
+          <select id="reports-station-select" class="input-control">
+            <option value="all">Todas as estações</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Data início</label>
+          <input id="reports-start-date" type="date" class="input-control" />
+        </div>
+        <div class="input-group">
+          <label>Data fim</label>
+          <input id="reports-end-date" type="date" class="input-control" />
+        </div>
+        <div class="buttons-group">
+          <button id="reports-apply-btn" type="button" class="btn btn-search">🔍 Aplicar filtros</button>
+        </div>
+      </div>
+
+      <p id="reports-status-msg" class="form-message"></p>
+
+      <div id="reports-empty-state" class="reports-empty-state hidden">
+        Defina os filtros da aba Relatórios e clique em Aplicar filtros para gerar o relatório.
+      </div>
+
+      <div id="reports-summary-grid" class="stats-grid reports-summary-grid"></div>
+
+      <div class="report-details-grid">
+        <section class="card report-details-card">
+          <h4 class="card-title">Detalhes por estação</h4>
+          <div id="reports-context" class="report-context-list"></div>
+        </section>
+
+        <section id="report-full-data-card" class="card report-details-card">
+          <h4 class="card-title">Dados completos das estações</h4>
+          <div class="table-wrapper report-table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Estação</th>
+                  <th>Data/Hora</th>
+                  <th>Temperatura</th>
+                  <th>Umidade</th>
+                  <th>Pressão</th>
+                  <th>Vel. Vento</th>
+                  <th>Dir. Vento</th>
+                  <th>Chuva</th>
+                </tr>
+              </thead>
+              <tbody id="reports-table-body">
+                <tr>
+                  <td colspan="8">Nenhum relatório gerado ainda.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="card hidden" id="users-panel">
+      <h3>Usuários do Cliente</h3>
+      <p class="subtitle">Lista de usuários vinculados ao mesmo cliente da sua conta.</p>
+      <p id="users-status-msg" class="form-message"></p>
+      <div class="table-wrapper users-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>E-mail</th>
+              <th>Perfil</th>
+              <th>Client ID</th>
+            </tr>
+          </thead>
+          <tbody id="users-table-body">
+            <tr>
+              <td colspan="4">Abra a aba para carregar os usuários.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card hidden" id="admin-logs-panel">
+      <h3>Exportação de Logs (Admin)</h3>
+      <p class="subtitle">Disponível apenas para administradores. Exporte os logs do sistema com filtros opcionais.</p>
+      <div class="filters-container admin-logs-filters">
+        <div class="input-group">
+          <label>Data início</label>
+          <input id="admin-logs-start-date" type="date" class="input-control" />
+        </div>
+        <div class="input-group">
+          <label>Data fim</label>
+          <input id="admin-logs-end-date" type="date" class="input-control" />
+        </div>
+        <div class="input-group">
+          <label>Usuário</label>
+          <input id="admin-logs-user-filter" type="text" class="input-control" placeholder="Nome ou e-mail" />
+        </div>
+      </div>
+      <button id="download-logs-btn" type="button" class="btn btn-refresh">⬇️ Baixar logs</button>
+      <p id="admin-logs-msg" class="form-message"></p>
+    </section>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />

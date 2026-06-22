@@ -1,8 +1,8 @@
 import time
-from flask import request, g
-from src.database.repository.firebase_log import FirebaseLogRepository
+from flask import g
+from src.services.audit_log_service import AuditLogService
 
-_repo = FirebaseLogRepository()
+_audit = AuditLogService()
 
 
 def register_logger(app):
@@ -15,12 +15,7 @@ def register_logger(app):
     def after(response):
         duration_ms = round((time.time() - g.get("start_time", time.time())) * 1000, 2)
         try:
-            _repo.save({
-                "method": request.method,
-                "path": request.path,
-                "status": response.status_code,
-                "duration_ms": duration_ms,
-            })
+            _audit.log_access(response, duration_ms)
         except Exception:
             pass  # Não interrompe a resposta se o Firebase estiver indisponível
         return response

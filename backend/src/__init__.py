@@ -41,6 +41,7 @@ def create_app():
     from src.routers.devices_router      import devices_bp
     from src.routers.observations_router import observations_bp
     from src.routers.roles_router        import roles_bp
+    from src.routers.logs_router         import logs_bp
 
     app.register_blueprint(auth_bp,         url_prefix="/api/auth")
     app.register_blueprint(clients_bp,      url_prefix="/api/clients")
@@ -51,5 +52,6 @@ def create_app():
     app.register_blueprint(devices_bp,      url_prefix="/api/devices")
     app.register_blueprint(observations_bp, url_prefix="/api/observations")
     app.register_blueprint(roles_bp,        url_prefix="/api/roles")
+    app.register_blueprint(logs_bp,         url_prefix="/api/logs")
 
     return app
